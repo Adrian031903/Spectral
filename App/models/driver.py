@@ -65,31 +65,14 @@ class Driver(User):
                           status="Upcoming")
         db.session.add(new_drive)
         db.session.commit()
-
-        street = Street.query.get(streetId)
-        if street:
-            for resident in street.residents:
-                resident.receive_notif(
-                    f"SCHEDULED>> Drive {new_drive.id} by Driver {self.id} on {date} at {time}"
-                )
-            db.session.commit()
-        return (new_drive)
+        return new_drive
 
     def cancel_drive(self, driveId):
         drive = Drive.query.get(driveId)
         if drive:
             drive.status = "Cancelled"
             db.session.commit()
-
-            street = None
-            if self.streetId is not None:
-                street = Street.query.get(self.streetId)
-            if street:
-                for resident in street.residents:
-                    resident.receive_notif(
-                        f"CANCELLED: Drive {drive.id} by {self.id} on {drive.date} at {drive.time}"
-                    )
-                db.session.commit()
+            return drive
         return None
 
     def view_drives(self):

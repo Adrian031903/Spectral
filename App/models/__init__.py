@@ -9,3 +9,5 @@ from .area import Area
 from .street import Street
 from .item import Item
 from .driver_stock import DriverStock
+from .drive_subscription import DriveSubscription
+from .drive_observer import DriveObserver
