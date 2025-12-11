@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Login{% endblock %}
+{% block page %}Login{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h4>Sign In</h4>
+  <p>Use your username and password to access the Bread Van app.</p>
+  <p class="grey-text">Default demo users (after flask init): Admin admin/adminpass, Drivers bob/bobpass, mary/marypass, Residents alice/alicepass, jane/janepass, john/johnpass.</p>
+</div>
+<form method="POST" action="/login" class="card-panel">
+  <div class="row">
+    <div class="input-field col s12 m6">
+      <input id="username" name="username" type="text" class="validate" required>
+      <label for="username">Username</label>
+    </div>
+    <div class="input-field col s12 m6">
+      <input id="password" name="password" type="password" class="validate" required>
+      <label for="password">Password</label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s12 right-align">
+      <button type="submit" class="btn purple waves-effect">Login</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

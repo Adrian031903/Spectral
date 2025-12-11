@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="section hero-card">
+  <div class="pill">Observer-driven notifications • Live status</div>
+  <div class="hero-title">Bread Van Control Center</div>
+  <div class="hero-subtitle">Log in with your role and manage drives, stops, and notifications. The Observer pattern powers resident alerts in real time.</div>
+  <a class="btn purple" href="/login">Sign In</a>
+</div>
+
+<div class="section">
+  <h5 style="margin-bottom: 16px;">Choose your workspace</h5>
+  <div class="row">
+    <div class="col s12 m4">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Resident</span>
+          <p>Request stops, subscribe to drives, and track inbox notifications from drivers.</p>
+        </div>
+        <div class="card-action">
+          <a href="/portal/resident" class="purple-text">Open Resident Portal</a>
+        </div>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Driver</span>
+          <p>Schedule and manage drives, start/end runs, and notify subscribed residents.</p>
+        </div>
+        <div class="card-action">
+          <a href="/portal/driver" class="purple-text">Open Driver Portal</a>
+        </div>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Admin</span>
+          <p>Curate areas, streets, and users to keep the delivery network clean.</p>
+        </div>
+        <div class="card-action">
+          <a href="/portal/admin" class="purple-text">Open Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

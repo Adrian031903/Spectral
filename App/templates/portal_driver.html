@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block title %}Driver Portal{% endblock %}
+{% block page %}Driver Portal{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h4>Driver Tools</h4>
+  <p>Login as a Driver first. Use these actions to manage drives and trigger notifications.</p>
+  <div id="whoami" class="chip login-chip" style="display:none;"></div>
+  <div id="alert" class="card-panel red lighten-4" style="display:none;"></div>
+</div>
+
+<div class="row">
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Schedule Drive</span>
+        <div class="input-field"><input id="drv-area" type="number" min="1"><label for="drv-area">Area ID</label></div>
+        <div class="input-field"><input id="drv-street" type="number" min="1"><label for="drv-street">Street ID</label></div>
+        <div class="input-field"><input id="drv-date" type="date"><label class="active" for="drv-date">Date</label></div>
+        <div class="input-field"><input id="drv-time" type="time"><label class="active" for="drv-time">Time</label></div>
+      </div>
+      <div class="card-action">
+        <button class="btn purple" id="btn-schedule">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Manage Drive Status</span>
+        <div class="input-field"><input id="drive-id" type="number" min="1"><label for="drive-id">Drive ID</label></div>
+      </div>
+      <div class="card-action">
+        <button class="btn purple" id="btn-start">Start</button>
+        <button class="btn" id="btn-end">End Current</button>
+        <button class="btn red" id="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">My Drives</span>
+        <p>Shows upcoming and in-progress drives.</p>
+      </div>
+      <div class="card-action">
+        <button class="btn grey" id="btn-list">Refresh List</button>
+      </div>
+      <ul class="collection" id="drive-list"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+function showToast(msg) { M.toast({html: msg}); }
+function showAlert(msg) {
+  const el = document.getElementById('alert');
+  if (!el) return;
+  if (!msg) { el.style.display='none'; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, ...options});
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const msg = body.error?.message || body.message || res.statusText;
+    showAlert(msg);
+    throw new Error(msg);
+  }
+  showAlert('');
+  return res.json().catch(() => ({}));
+}
+
+async function loadWhoAmI() {
+  const chip = document.getElementById('whoami');
+  if (!chip) return;
+  try {
+    const data = await apiFetch('/api/identify');
+    chip.textContent = `Logged in as ${data.message || data.username || 'Driver'}`;
+    chip.style.display = 'inline-flex';
+  } catch (e) {
+    chip.textContent = 'Not logged in';
+    chip.style.display = 'inline-flex';
+  }
+}
+
+const driveList = document.getElementById('drive-list');
+
+async function refreshDrives() {
+  driveList.innerHTML = '';
+  try {
+    const data = await apiFetch('/driver/drives');
+    (data.items || []).forEach(d => {
+      const li = document.createElement('li');
+      li.className = 'collection-item';
+      li.textContent = `Drive ${d.id} - ${d.status} on ${d.date} ${d.time}`;
+      driveList.appendChild(li);
+    });
+    showToast('Drives loaded');
+  } catch (e) { showToast(e.message); }
+}
+
+document.getElementById('btn-list')?.addEventListener('click', refreshDrives);
+loadWhoAmI();
+
+document.getElementById('btn-schedule')?.addEventListener('click', async () => {
+  const area = Number(document.getElementById('drv-area').value);
+  const street = Number(document.getElementById('drv-street').value);
+  const date = document.getElementById('drv-date').value;
+  const time = document.getElementById('drv-time').value;
+  if (!street || !date || !time) return showToast('Area, street, date, time required');
+  try {
+    await apiFetch('/driver/drives', {method: 'POST', body: JSON.stringify({area_id: area, street_id: street, date, time})});
+    showToast('Drive scheduled');
+    refreshDrives();
+  } catch (e) { showToast(e.message); }
+});
+
+document.getElementById('btn-start')?.addEventListener('click', async () => {
+  const driveId = Number(document.getElementById('drive-id').value);
+  if (!driveId) return showToast('Enter drive id');
+  try {
+    await apiFetch(`/driver/drives/${driveId}/start`, {method: 'POST'});
+    showToast('Drive started');
+    refreshDrives();
+  } catch (e) { showToast(e.message); }
+});
+
+document.getElementById('btn-end')?.addEventListener('click', async () => {
+  try {
+    await apiFetch(`/driver/drives/0/end`, {method: 'POST'});
+    showToast('Ended current drive');
+    refreshDrives();
+  } catch (e) { showToast(e.message); }
+});
+
+document.getElementById('btn-cancel')?.addEventListener('click', async () => {
+  const driveId = Number(document.getElementById('drive-id').value);
+  if (!driveId) return showToast('Enter drive id');
+  try {
+    await apiFetch(`/driver/drives/${driveId}/cancel`, {method: 'POST'});
+    showToast('Drive cancelled');
+    refreshDrives();
+  } catch (e) { showToast(e.message); }
+});
+
+</script>
+{% endblock %}

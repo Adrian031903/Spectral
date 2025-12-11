@@ -1,3 +1,161 @@
-html {
+/* Global theme tweaks */
+html, body {
     padding: 0;
+    margin: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #0b1224 100%);
+    color: #e5e7eb;
+    font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+}
+
+nav.purple {
+    background: linear-gradient(120deg, #7c3aed, #6366f1);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+nav .brand-logo {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.container {
+    max-width: 1080px;
+}
+
+.card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+}
+
+.card .card-content {
+    color: #f3f4f6;
+}
+
+.card .card-title {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #f9fafb;
+}
+
+.card .card-action {
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.card label,
+.card .input-field label,
+.card .input-field label.active {
+    color: #e5e7eb !important;
+    opacity: 0.95;
+}
+
+.card input[type=text],
+.card input[type=number],
+.card input[type=password],
+.card input[type=date],
+.card input[type=time] {
+    color: #f9fafb;
+}
+
+.card .helper-text { color: #cbd5e1; }
+
+.btn, .btn-flat {
+    border-radius: 10px;
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.btn.purple {
+    background: linear-gradient(120deg, #8b5cf6, #6366f1);
+}
+
+.section {
+    margin-bottom: 28px;
+}
+
+.hero-card {
+    background: radial-gradient(circle at 20% 20%, rgba(124,58,237,0.25), transparent 30%),
+                            radial-gradient(circle at 80% 0%, rgba(99,102,241,0.25), transparent 25%),
+                            #0b1224;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    border-radius: 18px;
+    padding: 28px;
+}
+
+.hero-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.hero-subtitle {
+    color: #cbd5e1;
+    margin-bottom: 18px;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    color: #f9fafb;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.collection-item {
+    background: rgba(255,255,255,0.02) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    color: #e5e7eb;
+}
+
+.input-field input[type=text],
+.input-field input[type=number],
+.input-field input[type=password],
+.input-field input[type=date],
+.input-field input[type=time] {
+    color: #e5e7eb;
+}
+
+.input-field label {
+    color: #cbd5e1;
+}
+
+.card-panel {
+    background: rgba(255,255,255,0.04) !important;
+    color: #e5e7eb;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.chip {
+    background: rgba(255,255,255,0.08) !important;
+    color: #e5e7eb !important;
+    font-weight: 600;
+}
+
+.login-chip {
+    background: linear-gradient(120deg, #2563eb, #7c3aed) !important;
+    color: #f8fafc !important;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+}
+
+a.purple-text {
+    color: #a78bfa !important;
+    font-weight: 700;
+}
+
+/* Subtle hover lift */
+.card:hover {
+    transform: translateY(-3px);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
 }

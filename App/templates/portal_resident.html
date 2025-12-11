@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+{% block title %}Resident Portal{% endblock %}
+{% block page %}Resident Portal{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h4>Resident Tools</h4>
+  <p>Login first (top bar) to get a JWT cookie, then use the actions below.</p>
+  <div id="whoami" class="chip login-chip" style="display:none;"></div>
+  <div id="alert" class="card-panel red lighten-4" style="display:none;"></div>
+</div>
+
+<div class="row">
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Inbox</span>
+        <p>Fetch notifications for your subscriptions.</p>
+      </div>
+      <div class="card-action">
+        <button class="btn purple" id="btn-inbox">Load Inbox</button>
+      </div>
+      <ul class="collection" id="inbox-list"></ul>
+    </div>
+  </div>
+
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Subscriptions</span>
+        <p>Subscribe or unsubscribe from a drive to get live status updates.</p>
+      </div>
+      <div class="card-action">
+        <div class="input-field">
+          <input id="sub-drive-id" type="number" min="1" />
+          <label for="sub-drive-id">Drive ID</label>
+        </div>
+        <button class="btn purple" id="btn-subscribe">Subscribe</button>
+        <button class="btn-flat" id="btn-unsubscribe">Unsubscribe</button>
+        <button class="btn grey" id="btn-list-subs">List Subscriptions</button>
+      </div>
+      <ul class="collection" id="subs-list"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Request Stop</span>
+        <p>Request a stop on an upcoming drive.</p>
+      </div>
+      <div class="card-action">
+        <div class="input-field">
+          <input id="stop-drive-id" type="number" min="1" />
+          <label for="stop-drive-id">Drive ID</label>
+        </div>
+        <button class="btn purple" id="btn-request-stop">Request Stop</button>
+      </div>
+      <div class="card-panel" id="stop-result" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showToast(msg) { M.toast({html: msg}); }
+function showAlert(msg) {
+  const el = document.getElementById('alert');
+  if (!el) return;
+  if (!msg) { el.style.display='none'; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, ...options});
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const msg = body.error?.message || body.message || res.statusText;
+    showAlert(msg);
+    throw new Error(msg);
+  }
+  showAlert('');
+  return res.json().catch(() => ({}));
+}
+
+async function loadWhoAmI() {
+  const chip = document.getElementById('whoami');
+  if (!chip) return;
+  try {
+    const data = await apiFetch('/api/identify');
+    chip.textContent = `Logged in as ${data.message || data.username || 'Resident'}`;
+    chip.style.display = 'inline-flex';
+  } catch (e) {
+    chip.textContent = 'Not logged in';
+    chip.style.display = 'inline-flex';
+  }
+}
+
+const inboxBtn = document.getElementById('btn-inbox');
+const inboxList = document.getElementById('inbox-list');
+const subsList = document.getElementById('subs-list');
+const stopResult = document.getElementById('stop-result');
+
+inboxBtn?.addEventListener('click', async () => {
+  inboxList.innerHTML = '';
+  try {
+    const data = await apiFetch('/resident/inbox');
+    (data.items || data).forEach(msg => {
+      const li = document.createElement('li');
+      li.className = 'collection-item';
+      li.textContent = msg;
+      inboxList.appendChild(li);
+    });
+    showToast('Inbox loaded');
+  } catch (e) { showToast(e.message); }
+});
+
+async function refreshSubs() {
+  subsList.innerHTML = '';
+  try {
+    const data = await apiFetch('/resident/subscriptions');
+    (data.items || []).forEach(sub => {
+      const li = document.createElement('li');
+      li.className = 'collection-item';
+      li.textContent = `Drive ${sub.driveId}`;
+      subsList.appendChild(li);
+    });
+  } catch (e) { showToast(e.message); }
+}
+
+document.getElementById('btn-list-subs')?.addEventListener('click', refreshSubs);
+
+document.getElementById('btn-subscribe')?.addEventListener('click', async () => {
+  const driveId = Number(document.getElementById('sub-drive-id').value);
+  if (!driveId) return showToast('Enter drive id');
+  try {
+    await apiFetch('/resident/subscriptions', {method: 'POST', body: JSON.stringify({drive_id: driveId})});
+    showToast('Subscribed');
+    refreshSubs();
+  } catch (e) { showToast(e.message); }
+});
+
+document.getElementById('btn-unsubscribe')?.addEventListener('click', async () => {
+  const driveId = Number(document.getElementById('sub-drive-id').value);
+  if (!driveId) return showToast('Enter drive id');
+  try {
+    await apiFetch(`/resident/subscriptions/${driveId}`, {method: 'DELETE'});
+    showToast('Unsubscribed');
+    refreshSubs();
+  } catch (e) { showToast(e.message); }
+});
+
+document.getElementById('btn-request-stop')?.addEventListener('click', async () => {
+  const driveId = Number(document.getElementById('stop-drive-id').value);
+  if (!driveId) return showToast('Enter drive id');
+  try {
+    const data = await apiFetch('/resident/stops', {method: 'POST', body: JSON.stringify({drive_id: driveId})});
+    stopResult.style.display = 'block';
+    stopResult.textContent = `Stop created with id ${data.id || ''}`;
+    showToast('Stop requested');
+    refreshSubs();
+  } catch (e) { showToast(e.message); }
+});
+
+</script>
+
+loadWhoAmI();
+{% endblock %}

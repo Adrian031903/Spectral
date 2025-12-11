@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block page %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="section hero-card">
+  <div class="hero-title">Create an account</div>
+  <div class="hero-subtitle">Choose your role and credentials. Residents need area/street/house info; drivers only need username/password.</div>
+</div>
+
+<form method="POST" action="/signup" class="card-panel">
+  <div class="row">
+    <div class="input-field col s12 m6">
+      <input id="username" name="username" type="text" class="validate" required>
+      <label for="username">Username</label>
+    </div>
+    <div class="input-field col s12 m6">
+      <input id="password" name="password" type="password" class="validate" required>
+      <label for="password">Password</label>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="input-field col s12 m6">
+      <select name="role" id="role" class="browser-default">
+        <option value="resident" selected>Resident</option>
+        <option value="driver">Driver</option>
+        <option value="user">User (basic)</option>
+      </select>
+      <label class="active" for="role">Role</label>
+    </div>
+  </div>
+
+  <div class="row" id="resident-fields">
+    <div class="input-field col s12 m4">
+      <input id="area_id" name="area_id" type="number" min="1">
+      <label for="area_id" class="active">Area ID</label>
+    </div>
+    <div class="input-field col s12 m4">
+      <input id="street_id" name="street_id" type="number" min="1">
+      <label for="street_id" class="active">Street ID</label>
+    </div>
+    <div class="input-field col s12 m4">
+      <input id="house_number" name="house_number" type="number" min="1">
+      <label for="house_number" class="active">House Number</label>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12 right-align">
+      <button type="submit" class="btn purple waves-effect">Create Account</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  const roleSelect = document.getElementById('role');
+  const residentFields = document.getElementById('resident-fields');
+  function toggleFields() {
+    const role = roleSelect.value;
+    residentFields.style.display = role === 'resident' ? 'flex' : 'none';
+  }
+  roleSelect.addEventListener('change', toggleFields);
+  toggleFields();
+</script>
+{% endblock %}
