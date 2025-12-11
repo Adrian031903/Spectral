@@ -67,3 +67,45 @@ def driver_stats():
     except ValueError as e:
         return jsonify({'error': {'code': 'not_found', 'message': str(e)}}), 404
     return jsonify({'stats': stats}), 200
+
+
+@resident_views.route('/resident/subscriptions', methods=['GET'])
+@jwt_required()
+@role_required('Resident')
+def list_subscriptions():
+    uid = current_user_id()
+    resident = user_controller.get_user(uid)
+    subs = resident_controller.resident_list_subscriptions(resident)
+    items = [s.get_json() if hasattr(s, 'get_json') else s for s in (subs or [])]
+    return jsonify({'items': items}), 200
+
+
+@resident_views.route('/resident/subscriptions', methods=['POST'])
+@jwt_required()
+@role_required('Resident')
+def subscribe_drive():
+    data = request.get_json() or {}
+    drive_id = data.get('drive_id')
+    if not drive_id:
+        return jsonify({'error': {'code': 'validation_error', 'message': 'drive_id required'}}), 422
+    uid = current_user_id()
+    resident = user_controller.get_user(uid)
+    try:
+        sub = resident_controller.resident_subscribe_to_drive(resident, int(drive_id))
+    except ValueError as e:
+        return jsonify({'error': {'code': 'not_found', 'message': str(e)}}), 404
+    out = sub.get_json() if hasattr(sub, 'get_json') else {'driveId': drive_id}
+    return jsonify(out), 201
+
+
+@resident_views.route('/resident/subscriptions/<int:drive_id>', methods=['DELETE'])
+@jwt_required()
+@role_required('Resident')
+def unsubscribe_drive(drive_id):
+    uid = current_user_id()
+    resident = user_controller.get_user(uid)
+    try:
+        resident_controller.resident_unsubscribe_from_drive(resident, drive_id)
+    except ValueError as e:
+        return jsonify({'error': {'code': 'not_found', 'message': str(e)}}), 404
+    return '', 204

@@ -7,6 +7,26 @@ index_views = Blueprint('index_views', __name__, template_folder='../templates')
 def index_page():
     return render_template('index.html')
 
+
+@index_views.route('/dashboard', methods=['GET'])
+def dashboard_page():
+    return render_template('dashboard.html')
+
+
+@index_views.route('/portal/resident', methods=['GET'])
+def portal_resident_page():
+    return render_template('portal_resident.html')
+
+
+@index_views.route('/portal/driver', methods=['GET'])
+def portal_driver_page():
+    return render_template('portal_driver.html')
+
+
+@index_views.route('/portal/admin', methods=['GET'])
+def portal_admin_page():
+    return render_template('portal_admin.html')
+
 @index_views.route('/init', methods=['GET'])
 def init():
     initialize()
