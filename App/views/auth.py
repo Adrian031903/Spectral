@@ -6,7 +6,6 @@ from.index import index_views
 
 from App.controllers import (
     login,
-    create_user,
 )
 from App.controllers import resident as resident_controller
 from App.controllers import admin as admin_controller
@@ -87,7 +86,7 @@ def signup_action():
         elif role == 'driver':
             user = admin_controller.admin_create_driver(username, password)
         else:
-            user = create_user(username, password)
+            raise ValueError('Unsupported role; choose resident or driver')
     except Exception as e:
         msg = str(e)
         flash(msg)
@@ -106,8 +105,8 @@ def signup_action():
 
 @auth_views.route('/logout', methods=['GET'])
 def logout_action():
-    response = jsonify({'message': 'Logged out'})
     flash("Logged Out!")
+    response = redirect(url_for('index_views.dashboard_page'))
     unset_jwt_cookies(response)
     return response
 
@@ -147,7 +146,7 @@ def signup_api():
     data = request.get_json() or {}
     username = data.get('username')
     password = data.get('password')
-    role = data.get('role', 'resident')
+    role = data.get('role', 'resident').lower()
     if not username or not password:
         return jsonify({'error': {'code': 'validation_error', 'message': 'username and password required'}}), 422
 
@@ -160,7 +159,9 @@ def signup_api():
         resident = resident_controller.resident_create(username, password, area_id, street_id, house_number)
         out = resident.get_json() if hasattr(resident, 'get_json') else {'id': resident.id}
         return jsonify(out), 201
-    else:
-        user = create_user(username, password)
+    elif role == 'driver':
+        user = admin_controller.admin_create_driver(username, password)
         out = user.get_json() if hasattr(user, 'get_json') else {'id': user.id}
         return jsonify(out), 201
+    else:
+        return jsonify({'error': {'code': 'validation_error', 'message': 'unsupported role; use resident or driver'}}), 422

@@ -5,13 +5,35 @@
 {{ super() }}
 
 {% block content %}
-    <h1>Flask MVC</h1>
-    {% if is_authenticated %}
-        <p> Welcome {{current_user.username}} </p>
-    {% endif %}
-    <p>This is a boileplate flask application which follows the MVC pattern for structuring the project.</p>
-    <div class="section">
-      <a class="btn purple" href="/dashboard">Open Dashboard</a>
-      <a class="btn-flat" href="/login">Login Page</a>
+<div class="section hero-card" style="margin-top: 24px;">
+  <div class="pill">Bread Van Platform • Operations & Alerts</div>
+  <div class="hero-title">Coordinate deliveries with confidence</div>
+  <div class="hero-subtitle">Log in as Resident, Driver, or Admin to manage routes, subscriptions, and live notifications powered by the Observer pattern.</div>
+  <div class="cta-row">
+    <a class="btn purple" href="/dashboard">Go to Dashboard</a>
+    <a class="btn btn-ghost" href="/login">Sign In</a>
+    <a class="btn purple" href="/signup">Create Account</a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="title">Resident</div>
+      <div>Request stops, subscribe to drives, and track inbox notifications from nearby drivers.</div>
     </div>
+    <div class="feature-card">
+      <div class="title">Driver</div>
+      <div>Schedule runs, start/end drives, and notify subscribed residents in real time.</div>
+    </div>
+    <div class="feature-card">
+      <div class="title">Admin</div>
+      <div>Curate areas, streets, and users to keep the delivery network clean and organized.</div>
+    </div>
+    <div class="feature-card">
+      <div class="title">Seed credentials</div>
+      <div>Admin: admin/adminpass • Drivers: bob/bobpass, mary/marypass • Residents: alice/alicepass, jane/janepass, john/johnpass.</div>
+    </div>
+  </div>
+</div>
 {% endblock %}

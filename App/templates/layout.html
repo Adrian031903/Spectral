@@ -17,40 +17,25 @@
   </head>
   <body>
     
-        <nav class="purple">
-          <div class="nav-wrapper">
-            <a href= "#!" class="brand-logo center">Bread Van</a>
-              <ul id="nav-mobile" class="left">
-                  <li><a href="/">Home</a></li>
+        <nav class="purple navbar-elevated">
+          <div class="nav-wrapper container nav-inner">
+            <div class="nav-left">
+              <a href="/" class="brand-logo">Bread Van</a>
+              <ul class="nav-links hide-on-small-only">
                   <li><a href="/dashboard">Dashboard</a></li>
                   <li><a href="/portal/resident">Resident</a></li>
                   <li><a href="/portal/driver">Driver</a></li>
                   <li><a href="/portal/admin">Admin</a></li>
-                  <li><a href="/users">Users Jinja</a></li>
                   <li><a href="/signup">Sign Up</a></li>
-                  {% if is_authenticated %}
-                    <li><a href="/identify">Identify</a></li>
-                  {% endif %}
-                    <li><a href="/static/users">Users JS</a></li>
               </ul>
+            </div>
+            <div class="nav-right">
               {% if is_authenticated %}
-              <ul id="nav-mobile" class="right">
-                <li><a href="/logout">Logout</a></li>
-              </ul>
+                <a href="/logout" class="btn-flat nav-cta">Logout</a>
               {% else %}
-              <form class="right navbar-form" method="POST" action="/login" style="display: flex; flex-wrap: nowrap; align-items: center; margin-right: 10px;">
-                  <div class="input-field" style="margin-right: 10px;">
-                      <input placeholder="username" value="bob" name="username" type="text" class="validate" required>
-                      <label for="username">username</label>
-                  </div>
-                  <div class="input-field" style="margin-right: 10px;">
-                      <input placeholder="password"value="bobpass" name="password" type="password" class="validate" required>
-                      <label for="password">Password</label>
-                  </div>
-                  <button type="submit" class="btn waves-effect waves-light">Login</button>
-              </form>
+                <a href="/login" class="btn nav-cta">Login</a>
               {% endif %}
-              
+            </div>
           </div>
       </nav>
       <style>
@@ -60,6 +45,17 @@
       </style>
 
     <div class="container" id="content">{% block content %}{% endblock %}</div>
+
+    <div class="container footer">
+      <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
+        <span>Quick links:</span>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/portal/resident">Resident Portal</a>
+        <a href="/portal/driver">Driver Portal</a>
+        <a href="/portal/admin">Admin Portal</a>
+        <a href="/signup">Sign Up</a>
+      </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>

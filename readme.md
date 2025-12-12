@@ -1,33 +1,50 @@
-# 🍞 Bread Van App CLI
-This project provides a command-line interface (CLI) for managing and interacting with the Bread Van App.
- It is built with Flask CLI and click, and supports multiple roles: Admin, Driver, and Resident.
+# 🍞 Bread Van App
+Flask app with Admin/Driver/Resident portals, JWT auth, Observer-powered notifications, and supporting CLI tools.
 
-## 🚀 Setup
-### Install dependencies:
+## 🚀 Quick start (local)
 ```bash
-$ pip install -r requirements.txt
+pip install -r requirements.txt
+flask init            # create tables + seed demo users
+flask run             # or: gunicorn -c gunicorn_config.py App.main:app
 ```
 
-### Initialize the database:
-```bash
-flask init
-```
-This creates and initializes all accounts and tables.
-* Admin
-  * admin / adminpass
-* Drivers
-  * bob / bobpass
-  * mary / marypass
-* Residents
-  * alice / alicepass
-  * jane / janepass
-  * john / johnpass
+### Seeded accounts (after `flask init`)
+- Admin: admin / adminpass
+- Drivers: bob / bobpass, mary / marypass
+- Residents: alice / alicepass, jane / janepass, john / johnpass
 
-### Run any CLI command using:
-```bash
-flask <group> <command> [args...]
-```
+### Sign up (web)
+- Resident: requires area_id, street_id, house_number (seed data: Area 1 has streets 1-3; Area 2 has streets 4-5).
+- Driver: username + password only.
 
+### Portals
+- `/portal/admin` – manage areas/streets/users
+- `/portal/driver` – schedule/start/end/cancel drives
+- `/portal/resident` – subscribe, request stops, view inbox notifications
+
+## 🧭 Deploy
+
+### Render (uses render.yaml)
+1) Push to GitHub.
+2) In Render → New Blueprint → select repo; it will read render.yaml.
+3) Set env vars: `FLASK_APP=App.main`, `FLASK_ENV=production`, `SECRET_KEY=<secret>`, `DATABASE_URL=<postgres URL>`.
+4) Deploy; then run `flask init` once via Render shell to seed.
+
+### Heroku (alternative)
+1) `heroku create your-app`
+2) `heroku addons:create heroku-postgresql:hobby-dev`
+3) `heroku config:set FLASK_APP=App.main FLASK_ENV=production SECRET_KEY=<secret>`
+4) `git push heroku main`
+5) `heroku run flask init`
+
+### VPS/manual
+- Install Python 3.9+, Postgres; set env vars above.
+- `pip install -r requirements.txt`
+- `flask init`
+- `gunicorn -c gunicorn_config.py App.main:app` behind your reverse proxy (TLS via Nginx/Caddy).
+
+## 🖥️ CLI usage (still available)
+- Run commands: `flask <group> <command> [args...]`
 
 ## 👤 User Commands | Group: flask user
 ### Login
@@ -163,9 +180,9 @@ flask resident view_driver_stats <driver_id>
 
 
 ## 🔑 Role Requirements
-* flask admin ... → must be logged in as Admin
-* flask driver ... → must be logged in as Driver
-* flask resident ... → must be logged in as Resident
+- flask admin ... → must be logged in as Admin
+- flask driver ... → must be logged in as Driver
+- flask resident ... → must be logged in as Resident
 
 
 General user commands (login/logout/view_street_drives) are available to all.

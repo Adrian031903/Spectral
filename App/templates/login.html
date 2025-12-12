@@ -3,26 +3,56 @@
 {% block page %}Login{% endblock %}
 
 {% block content %}
-<div class="section">
-  <h4>Sign In</h4>
-  <p>Use your username and password to access the Bread Van app.</p>
-  <p class="grey-text">Default demo users (after flask init): Admin admin/adminpass, Drivers bob/bobpass, mary/marypass, Residents alice/alicepass, jane/janepass, john/johnpass.</p>
+<div class="section hero-card" style="margin-top: 20px;">
+  <div class="pill">Secure access</div>
+  <div class="hero-title">Sign in to your workspace</div>
+  <div class="hero-subtitle">Use your credentials or the seeded demo accounts below to jump into the portals.</div>
+  <div class="feature-grid" style="margin-top: 12px;">
+    <div class="feature-card"><div class="title">Admin</div><div>admin / adminpass</div></div>
+    <div class="feature-card"><div class="title">Drivers</div><div>bob / bobpass • mary / marypass</div></div>
+    <div class="feature-card"><div class="title">Residents</div><div>alice / alicepass • jane / janepass • john / johnpass</div></div>
+  </div>
 </div>
-<form method="POST" action="/login" class="card-panel">
-  <div class="row">
-    <div class="input-field col s12 m6">
-      <input id="username" name="username" type="text" class="validate" required>
-      <label for="username">Username</label>
+
+<form method="POST" action="/login" class="card">
+  <div class="card-content">
+    <span class="card-title">Login</span>
+    <p class="grey-text" style="margin-bottom: 12px;">Pick a role to auto-fill, or enter your own credentials.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+      <a class="btn-flat" data-user="admin" data-pass="adminpass">Admin</a>
+      <a class="btn-flat" data-user="bob" data-pass="bobpass">Driver (bob)</a>
+      <a class="btn-flat" data-user="alice" data-pass="alicepass">Resident (alice)</a>
     </div>
-    <div class="input-field col s12 m6">
-      <input id="password" name="password" type="password" class="validate" required>
-      <label for="password">Password</label>
+    <div class="row">
+      <div class="input-field col s12 m6">
+        <input id="username" name="username" type="text" class="validate" required>
+        <label for="username">Username</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="password" name="password" type="password" class="validate" required>
+        <label for="password">Password</label>
+      </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col s12 right-align">
-      <button type="submit" class="btn purple waves-effect">Login</button>
-    </div>
+  <div class="card-action" style="display:flex; justify-content:flex-end; gap:10px;">
+    <a class="btn-flat" href="/signup">Need an account?</a>
+    <button type="submit" class="btn purple waves-effect">Sign In</button>
   </div>
 </form>
+
+<script>
+  document.querySelectorAll('[data-user][data-pass]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const u = btn.getAttribute('data-user');
+      const p = btn.getAttribute('data-pass');
+      const uInput = document.getElementById('username');
+      const pInput = document.getElementById('password');
+      if (uInput && pInput) {
+        uInput.value = u;
+        pInput.value = p;
+        uInput.focus();
+      }
+    });
+  });
+</script>
 {% endblock %}

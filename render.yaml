@@ -1,35 +1,24 @@
-
 services:
 - type: web
-  name: flask-postgres-api
+  name: bread-van-app
   env: python
-  repo: https://github.com/uwidcit/flaskmvc.git
+  repo: https://github.com/We-re-Toast/Bread_Van_CLI_App.git
   plan: free
   branch: main
-  healthCheckPath: /healthcheck
+  healthCheckPath: /
   buildCommand: "pip install -r requirements.txt"
-  startCommand: "gunicorn wsgi:app"
+  startCommand: "gunicorn -c gunicorn_config.py wsgi:app"
   envVars:
-  - fromGroup: flask-postgres-api-settings
-  - key: POSTGRES_URL
+  - fromGroup: bread-van-app-settings
+  - key: FLASK_SQLALCHEMY_DATABASE_URI
     fromDatabase:
-      name: flask-postgres-api-db
-      property: host
-  - key: POSTGRES_USER
-    fromDatabase:
-      name: flask-postgres-api-db
-      property: user
-  - key: POSTGRES_PASSWORD
-    fromDatabase:
-      name: flask-postgres-api-db
-      property: password
-  - key: POSTGRES_DB
-    fromDatabase:
-      name: flask-postgres-api-db
-      property: database 
+      name: bread-van-db
+      property: connectionString
+  - key: FLASK_SECRET_KEY
+    generateValue: true
 
 envVarGroups:
-- name: flask-postgres-api-settings
+- name: bread-van-app-settings
   envVars:
   - key: ENV
     value: production
@@ -38,6 +27,6 @@ envVarGroups:
     
 
 databases:
-- name: flask-postgres-api-db
+- name: bread-van-db
   plan: free
-  databaseName: mydb
+  databaseName: bread_van_db

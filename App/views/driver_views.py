@@ -47,9 +47,12 @@ def create_drive():
         return jsonify({'error': {'code': 'validation_error', 'message': 'street_id, date and time required'}}), 422
     uid = current_user_id()
     driver = user_controller.get_user(uid)
-    drive = driver_controller.driver_schedule_drive(driver, area_id, street_id, date, time)
-    out = drive.get_json() if hasattr(drive, 'get_json') else drive
-    return jsonify(out), 201
+    try:
+        drive = driver_controller.driver_schedule_drive(driver, area_id, street_id, date, time)
+        out = drive.get_json() if hasattr(drive, 'get_json') else drive
+        return jsonify(out), 201
+    except Exception as e:
+        return jsonify({'error': {'code': 'driver_schedule_error', 'message': str(e)}}), 400
 
 
 @driver_views.route('/driver/drives/<int:drive_id>/start', methods=['POST'])
@@ -58,8 +61,11 @@ def create_drive():
 def start_drive(drive_id):
     uid = current_user_id()
     driver = user_controller.get_user(uid)
-    driver_controller.driver_start_drive(driver, drive_id)
-    return jsonify({'id': drive_id, 'status': 'started'}), 200
+    try:
+        driver_controller.driver_start_drive(driver, drive_id)
+        return jsonify({'id': drive_id, 'status': 'started'}), 200
+    except Exception as e:
+        return jsonify({'error': {'code': 'driver_start_error', 'message': str(e)}}), 400
 
 
 @driver_views.route('/driver/drives/<int:drive_id>/end', methods=['POST'])
@@ -68,8 +74,11 @@ def start_drive(drive_id):
 def end_drive(drive_id):
     uid = current_user_id()
     driver = user_controller.get_user(uid)
-    res = driver_controller.driver_end_drive(driver)
-    return jsonify({'id': getattr(res, 'id', drive_id), 'status': 'ended'}), 200
+    try:
+        res = driver_controller.driver_end_drive(driver)
+        return jsonify({'id': getattr(res, 'id', drive_id), 'status': 'ended'}), 200
+    except Exception as e:
+        return jsonify({'error': {'code': 'driver_end_error', 'message': str(e)}}), 400
 
 
 @driver_views.route('/driver/drives/<int:drive_id>/cancel', methods=['POST'])
@@ -78,8 +87,11 @@ def end_drive(drive_id):
 def cancel_drive(drive_id):
     uid = current_user_id()
     driver = user_controller.get_user(uid)
-    driver_controller.driver_cancel_drive(driver, drive_id)
-    return jsonify({'id': drive_id, 'status': 'cancelled'}), 200
+    try:
+        driver_controller.driver_cancel_drive(driver, drive_id)
+        return jsonify({'id': drive_id, 'status': 'cancelled'}), 200
+    except Exception as e:
+        return jsonify({'error': {'code': 'driver_cancel_error', 'message': str(e)}}), 400
 
 
 @driver_views.route('/driver/drives/<int:drive_id>/requested-stops', methods=['GET'])
@@ -88,6 +100,9 @@ def cancel_drive(drive_id):
 def requested_stops(drive_id):
     uid = current_user_id()
     driver = user_controller.get_user(uid)
-    stops = driver_controller.driver_view_requested_stops(driver, drive_id)
-    items = [s.get_json() if hasattr(s, 'get_json') else s for s in (stops or [])]
-    return jsonify({'items': items}), 200
+    try:
+        stops = driver_controller.driver_view_requested_stops(driver, drive_id)
+        items = [s.get_json() if hasattr(s, 'get_json') else s for s in (stops or [])]
+        return jsonify({'items': items}), 200
+    except Exception as e:
+        return jsonify({'error': {'code': 'driver_stops_error', 'message': str(e)}}), 400

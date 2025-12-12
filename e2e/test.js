@@ -1,6 +1,20 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const { expect, assert }  = require('chai');
-const config = require('./config.json');
+
+let config = {};
+try {
+  // config.json is optional; defaults are provided below.
+  config = require('./config.json') || {};
+} catch (e) {
+  config = {};
+}
+
+config = {
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  timeout: 30000,
+  ...config,
+};
 
 let browser;
 let page;
@@ -61,8 +75,6 @@ context('The /static/users page', ()=>{
   it("Test 2: Page should have App Users as the title", async () => {
       expect(await page.title()).to.eql("App Users")
   });
-
-  //hello im on nick branch
 
   describe("Test 3: Page should have a users table header", () => {
     it("First table header should be 'Id'", async () => {

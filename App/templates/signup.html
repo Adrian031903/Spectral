@@ -5,62 +5,83 @@
 {% block content %}
 <div class="section hero-card">
   <div class="hero-title">Create an account</div>
-  <div class="hero-subtitle">Choose your role and credentials. Residents need area/street/house info; drivers only need username/password.</div>
+  <div class="hero-subtitle">Choose Resident or Driver. Residents need area/street/house info; drivers only need username/password.</div>
 </div>
 
-<form method="POST" action="/signup" class="card-panel">
-  <div class="row">
-    <div class="input-field col s12 m6">
-      <input id="username" name="username" type="text" class="validate" required>
-      <label for="username">Username</label>
-    </div>
-    <div class="input-field col s12 m6">
-      <input id="password" name="password" type="password" class="validate" required>
-      <label for="password">Password</label>
-    </div>
-  </div>
+<div class="section">
+  <form method="POST" action="/signup">
+    <div class="card">
+      <div class="card-content">
+      <span class="card-title">Account details</span>
+      <p class="grey-text">Seed data (after flask init): Areas 1-3 exist. In Area 1, streets 1-3; in Area 2, streets 4-5. Use these IDs for a quick Resident signup (example: area 1, street 1, house 10) or pick Driver to skip address fields.</p>
+      <div class="row">
+        <div class="input-field col s12 m6">
+          <input id="username" name="username" type="text" class="validate" required>
+          <label for="username">Username</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="password" name="password" type="password" class="validate" required>
+          <label for="password">Password</label>
+        </div>
+      </div>
 
-  <div class="row">
-    <div class="input-field col s12 m6">
-      <select name="role" id="role" class="browser-default">
-        <option value="resident" selected>Resident</option>
-        <option value="driver">Driver</option>
-        <option value="user">User (basic)</option>
-      </select>
-      <label class="active" for="role">Role</label>
-    </div>
-  </div>
+      <div class="row">
+        <div class="input-field col s12 m6">
+          <select name="role" id="role" class="browser-default">
+            <option value="resident" selected>Resident</option>
+            <option value="driver">Driver</option>
+          </select>
+          <label class="active" for="role">Role</label>
+        </div>
+      </div>
 
-  <div class="row" id="resident-fields">
-    <div class="input-field col s12 m4">
-      <input id="area_id" name="area_id" type="number" min="1">
-      <label for="area_id" class="active">Area ID</label>
+      <div class="row" id="resident-fields">
+        <div class="input-field col s12 m4">
+          <input id="area_id" name="area_id" type="number" min="1" value="1" placeholder="e.g., 1">
+          <label for="area_id" class="active">Area ID</label>
+        </div>
+        <div class="input-field col s12 m4">
+          <input id="street_id" name="street_id" type="number" min="1" value="1" placeholder="e.g., 1">
+          <label for="street_id" class="active">Street ID</label>
+        </div>
+        <div class="input-field col s12 m4">
+          <input id="house_number" name="house_number" type="number" min="1" value="10" placeholder="e.g., 10">
+          <label for="house_number" class="active">House Number</label>
+        </div>
+      </div>
+      </div>
+      <div class="card-action" style="display:flex; justify-content:flex-end; gap:10px;">
+        <a class="btn-flat" href="/login">Have an account? Login</a>
+        <button type="submit" class="btn purple waves-effect">Create Account</button>
+      </div>
     </div>
-    <div class="input-field col s12 m4">
-      <input id="street_id" name="street_id" type="number" min="1">
-      <label for="street_id" class="active">Street ID</label>
-    </div>
-    <div class="input-field col s12 m4">
-      <input id="house_number" name="house_number" type="number" min="1">
-      <label for="house_number" class="active">House Number</label>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col s12 right-align">
-      <button type="submit" class="btn purple waves-effect">Create Account</button>
-    </div>
-  </div>
-</form>
+  </form>
+</div>
 
 <script>
   const roleSelect = document.getElementById('role');
   const residentFields = document.getElementById('resident-fields');
+  const form = document.querySelector('form');
+
   function toggleFields() {
     const role = roleSelect.value;
     residentFields.style.display = role === 'resident' ? 'flex' : 'none';
+    residentFields.querySelectorAll('input').forEach(input => {
+      input.required = role === 'resident';
+    });
   }
   roleSelect.addEventListener('change', toggleFields);
   toggleFields();
+
+  form?.addEventListener('submit', (e) => {
+    if (roleSelect.value !== 'resident') return;
+    const area = document.getElementById('area_id').value;
+    const street = document.getElementById('street_id').value;
+    const house = document.getElementById('house_number').value;
+    if (!area || !street || !house) {
+      e.preventDefault();
+      if (window.M?.toast) M.toast({html: 'For Resident accounts, please fill Area, Street, and House Number.'});
+    }
+  });
 </script>
 {% endblock %}
