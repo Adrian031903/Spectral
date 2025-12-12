@@ -4,8 +4,9 @@ Flask app with Admin/Driver/Resident portals, JWT auth, Observer-powered notific
 ## 🚀 Quick start (local)
 ```bash
 pip install -r requirements.txt
+export FLASK_APP=wsgi.py
 flask init            # create tables + seed demo users
-flask run             # or: gunicorn -c gunicorn_config.py App.main:app
+flask run             # dev server
 ```
 
 ### Seeded accounts (after `flask init`)
@@ -21,27 +22,6 @@ flask run             # or: gunicorn -c gunicorn_config.py App.main:app
 - `/portal/admin` – manage areas/streets/users
 - `/portal/driver` – schedule/start/end/cancel drives
 - `/portal/resident` – subscribe, request stops, view inbox notifications
-
-## 🧭 Deploy
-
-### Render (uses render.yaml)
-1) Push to GitHub.
-2) In Render → New Blueprint → select repo; it will read render.yaml.
-3) Set env vars: `FLASK_APP=App.main`, `FLASK_ENV=production`, `SECRET_KEY=<secret>`, `DATABASE_URL=<postgres URL>`.
-4) Deploy; then run `flask init` once via Render shell to seed.
-
-### Heroku (alternative)
-1) `heroku create your-app`
-2) `heroku addons:create heroku-postgresql:hobby-dev`
-3) `heroku config:set FLASK_APP=App.main FLASK_ENV=production SECRET_KEY=<secret>`
-4) `git push heroku main`
-5) `heroku run flask init`
-
-### VPS/manual
-- Install Python 3.9+, Postgres; set env vars above.
-- `pip install -r requirements.txt`
-- `flask init`
-- `gunicorn -c gunicorn_config.py App.main:app` behind your reverse proxy (TLS via Nginx/Caddy).
 
 ## 🖥️ CLI usage (still available)
 - Run commands: `flask <group> <command> [args...]`
