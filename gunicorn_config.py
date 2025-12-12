@@ -8,8 +8,8 @@ bind = "0.0.0.0:8080"
 # The number of worker processes for handling requests.
 workers = 4
 
-# Use the 'gevent' worker type for async performance.
-worker_class = 'gevent'
+# Use the default synchronous worker.
+worker_class = 'sync'
 
 # Log level
 loglevel = 'info'
