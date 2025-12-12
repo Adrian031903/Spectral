@@ -2,7 +2,7 @@ services:
 - type: web
   name: bread-van-app
   env: python
-  repo: https://github.com/We-re-Toast/Bread_Van_CLI_App.git
+  repo: https://github.com/Adrian031903/Spectral.git
   plan: free
   branch: main
   healthCheckPath: /
