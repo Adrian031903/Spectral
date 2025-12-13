@@ -1,7 +1,5 @@
 import os
 
-from sqlalchemy.pool import NullPool
-
 def load_config(app, overrides):
     if os.path.exists(os.path.join('./App', 'custom_config.py')):
         app.config.from_object('App.custom_config')
@@ -14,10 +12,8 @@ def load_config(app, overrides):
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI') or ''
     if isinstance(db_uri, str) and db_uri.startswith(('postgres://', 'postgresql://')):
         engine_opts = app.config.get('SQLALCHEMY_ENGINE_OPTIONS') or {}
-        # Avoid long-lived pooled connections that can be dropped by managed Postgres.
-        engine_opts.setdefault('poolclass', NullPool)
-
         # Keep connection counts low on free-tier services (multiple workers).
+        # Use QueuePool (default) so pool_size/max_overflow/pool_timeout are valid.
         engine_opts.setdefault('pool_pre_ping', True)
         engine_opts.setdefault('pool_recycle', 280)
         engine_opts.setdefault('pool_size', 2)
