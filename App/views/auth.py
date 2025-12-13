@@ -3,6 +3,8 @@ from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, se
 
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
+from App.database import db
+
 
 from.index import index_views
 
@@ -55,6 +57,7 @@ def login_action():
         # Common on managed Postgres when connections are dropped/recycled.
         msg = 'Database temporarily unavailable. Please try again in a moment.'
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
         return redirect(url_for('auth_views.login_page'))
@@ -66,6 +69,7 @@ def login_action():
             msg = 'Database error. Please try again in a moment.'
         print(e)
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
         return redirect(url_for('auth_views.login_page'))
@@ -73,6 +77,7 @@ def login_action():
         print(e)
         msg = 'Unexpected error. Please try again.'
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 500
         return redirect(url_for('auth_views.login_page'))
@@ -126,6 +131,7 @@ def signup_action():
     except OperationalError:
         msg = 'Database temporarily unavailable. Please try again in a moment.'
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
         return redirect(url_for('auth_views.signup_page'))
@@ -137,12 +143,14 @@ def signup_action():
             msg = 'Database error. Please try again in a moment.'
         print(e)
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
         return redirect(url_for('auth_views.signup_page'))
     except Exception as e:
         msg = str(e)
         flash(msg)
+        db.session.rollback()
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 400
         return redirect(url_for('auth_views.signup_page'))
@@ -183,9 +191,11 @@ def user_login_api():
         else:
             msg = 'database error'
         print(e)
+        db.session.rollback()
         return jsonify({'error': msg}), 503
     except Exception as e:
         print(e)
+        db.session.rollback()
         return jsonify({'error': 'unexpected error'}), 500
     if not token:
         return jsonify(message='bad username or password given'), 401

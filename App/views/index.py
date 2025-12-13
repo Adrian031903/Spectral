@@ -38,6 +38,12 @@ def init():
 @index_views.route('/health', methods=['GET'])
 def health_check():
     result = {'status': 'healthy'}
+    # Clear any pending failed transaction so checks can run.
+    try:
+        db.session.rollback()
+    except Exception:
+        pass
+
     # Optional DB check: helps debug Render deployments.
     try:
         db.session.execute(text('SELECT 1'))
@@ -53,7 +59,7 @@ def health_check():
             result['schema_check_error'] = f"{type(e).__name__}: {str(e)[:180]}"
     except Exception as e:
         result['db_ok'] = False
-        result['db_error'] = f"{type(e).__name__}: {str(e)[:220]}"
+        result['db_error'] = f"{type(e).__name__}: {str(e)[:500]}"
         result['hint'] = 'If this is a fresh deploy, ensure DATABASE_URL/FLASK_SQLALCHEMY_DATABASE_URI is set and visit /init once.'
         return jsonify(result), 503
 
