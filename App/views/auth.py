@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 
+from sqlalchemy.exc import OperationalError
+
 
 from.index import index_views
 
@@ -39,7 +41,15 @@ def login_action():
     data = request.form or request.get_json() or {}
     username = data.get('username')
     password = data.get('password')
-    token = login(username, password)
+    try:
+        token = login(username, password)
+    except OperationalError:
+        # Common on managed Postgres when connections are dropped/recycled.
+        msg = 'Database temporarily unavailable. Please try again in a moment.'
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 503
+        return redirect(url_for('auth_views.login_page'))
 
     if not token:
         flash('Bad username or password given')
@@ -87,6 +97,12 @@ def signup_action():
             user = admin_controller.admin_create_driver(username, password)
         else:
             raise ValueError('Unsupported role; choose resident or driver')
+    except OperationalError:
+        msg = 'Database temporarily unavailable. Please try again in a moment.'
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 503
+        return redirect(url_for('auth_views.signup_page'))
     except Exception as e:
         msg = str(e)
         flash(msg)
