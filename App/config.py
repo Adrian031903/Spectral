@@ -12,13 +12,16 @@ def load_config(app, overrides):
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI') or ''
     if isinstance(db_uri, str) and db_uri.startswith(('postgres://', 'postgresql://')):
         engine_opts = app.config.get('SQLALCHEMY_ENGINE_OPTIONS') or {}
-        # Keep connection counts low on free-tier services (multiple workers).
-        # Use QueuePool (default) so pool_size/max_overflow/pool_timeout are valid.
+        # Production DB robustness (Render Postgres): keep connections healthy.
+        # NOTE: Some environments end up using NullPool; in that case, QueuePool-only
+        # options like pool_size/max_overflow/pool_timeout will crash create_engine.
         engine_opts.setdefault('pool_pre_ping', True)
         engine_opts.setdefault('pool_recycle', 280)
-        engine_opts.setdefault('pool_size', 2)
-        engine_opts.setdefault('max_overflow', 1)
-        engine_opts.setdefault('pool_timeout', 30)
+
+        # Remove QueuePool-only options if they exist (compatible with NullPool).
+        engine_opts.pop('pool_size', None)
+        engine_opts.pop('max_overflow', None)
+        engine_opts.pop('pool_timeout', None)
 
         # Ensure SSL when the connection string doesn't specify it.
         if 'sslmode=' not in db_uri:
