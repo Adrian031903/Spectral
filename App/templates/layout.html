@@ -44,7 +44,24 @@
           }
       </style>
 
-    <div class="container" id="content">{% block content %}{% endblock %}</div>
+    <div class="container" id="content">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="card" style="margin-top: 16px;">
+            <div class="card-content">
+              <span class="card-title" style="margin-bottom: 6px;">Notice</span>
+              <ul style="margin: 0; padding-left: 18px;">
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
 
     <div class="container footer">
       <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center;">

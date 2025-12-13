@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
 
 from.index import index_views
@@ -41,6 +41,14 @@ def login_action():
     data = request.form or request.get_json() or {}
     username = data.get('username')
     password = data.get('password')
+
+    if not username or not password:
+        msg = 'Username and password required'
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 422
+        return redirect(url_for('auth_views.login_page'))
+
     try:
         token = login(username, password)
     except OperationalError:
@@ -49,6 +57,24 @@ def login_action():
         flash(msg)
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
+        return redirect(url_for('auth_views.login_page'))
+    except SQLAlchemyError as e:
+        err_text = str(e).lower()
+        if 'no such table' in err_text or 'undefinedtable' in err_text or ('relation' in err_text and 'does not exist' in err_text):
+            msg = 'Database is not initialized yet. Visit /init once, then try again.'
+        else:
+            msg = 'Database error. Please try again in a moment.'
+        print(e)
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 503
+        return redirect(url_for('auth_views.login_page'))
+    except Exception as e:
+        print(e)
+        msg = 'Unexpected error. Please try again.'
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 500
         return redirect(url_for('auth_views.login_page'))
 
     if not token:
@@ -103,6 +129,17 @@ def signup_action():
         if request.content_type and 'json' in request.content_type:
             return jsonify({'error': msg}), 503
         return redirect(url_for('auth_views.signup_page'))
+    except SQLAlchemyError as e:
+        err_text = str(e).lower()
+        if 'no such table' in err_text or 'undefinedtable' in err_text or ('relation' in err_text and 'does not exist' in err_text):
+            msg = 'Database is not initialized yet. Visit /init once, then try again.'
+        else:
+            msg = 'Database error. Please try again in a moment.'
+        print(e)
+        flash(msg)
+        if request.content_type and 'json' in request.content_type:
+            return jsonify({'error': msg}), 503
+        return redirect(url_for('auth_views.signup_page'))
     except Exception as e:
         msg = str(e)
         flash(msg)
@@ -132,13 +169,29 @@ API Routes
 
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
-  data = request.json
-  token = login(data['username'], data['password'])
-  if not token:
-    return jsonify(message='bad username or password given'), 401
-  response = jsonify(access_token=token) 
-  set_access_cookies(response, token)
-  return response
+    data = request.get_json() or {}
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        return jsonify({'error': 'username and password required'}), 422
+    try:
+        token = login(username, password)
+    except SQLAlchemyError as e:
+        err_text = str(e).lower()
+        if 'no such table' in err_text or 'undefinedtable' in err_text or ('relation' in err_text and 'does not exist' in err_text):
+            msg = 'database not initialized'
+        else:
+            msg = 'database error'
+        print(e)
+        return jsonify({'error': msg}), 503
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'unexpected error'}), 500
+    if not token:
+        return jsonify(message='bad username or password given'), 401
+    response = jsonify(access_token=token)
+    set_access_cookies(response, token)
+    return response
 
 @auth_views.route('/api/identify', methods=['GET'])
 @jwt_required()

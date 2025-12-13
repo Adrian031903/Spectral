@@ -7,6 +7,17 @@ def load_config(app, overrides):
         app.config.from_object('App.default_config')
     app.config.from_prefixed_env()
 
+    # Render commonly exposes the connection string as DATABASE_URL, while this
+    # app loads FLASK_-prefixed env vars. If no FLASK_SQLALCHEMY_DATABASE_URI is
+    # provided, fall back to DATABASE_URL.
+    if not os.getenv('FLASK_SQLALCHEMY_DATABASE_URI'):
+        database_url = os.getenv('DATABASE_URL')
+        if database_url:
+            # Normalize scheme for SQLAlchemy compatibility.
+            if database_url.startswith('postgres://'):
+                database_url = 'postgresql://' + database_url[len('postgres://'):]
+            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+
     # Production DB robustness (Render Postgres): avoid stale pooled connections.
     # Only apply to Postgres URLs.
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI') or ''
