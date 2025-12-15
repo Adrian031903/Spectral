@@ -35,8 +35,6 @@ class Driver(User):
 
     def login(self, password):
         if super().login(password):
-            self.areaId = 0
-            self.streetId = 0
             self.status = "Available"
             db.session.commit()
             return True

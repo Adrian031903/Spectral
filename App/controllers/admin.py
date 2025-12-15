@@ -1,13 +1,22 @@
-from App.models import Admin, Driver, Area, Street, Item
+from App.models import Admin, Driver, Area, Street, Item, User
 from App.database import db
 
 # All admin-related business logic will be moved here as functions
 
 def admin_create_driver(username, password):
-    existing_user = Admin.query.filter_by(username=username).first()
+    existing_user = User.query.filter_by(username=username).first()
     if existing_user:
         raise ValueError("Username already taken.")
-    driver = Driver(username=username, password=password, status="Offline", areaId=0, streetId=None)
+
+    # Driver.areaId is NOT NULL and is a foreign key to Area.
+    # Using 0 will crash on Postgres with FK violations (Render).
+    area = Area.query.order_by(Area.id.asc()).first()
+    if not area:
+        area = Area(name="Unassigned")
+        db.session.add(area)
+        db.session.commit()
+
+    driver = Driver(username=username, password=password, status="Offline", areaId=area.id, streetId=None)
     db.session.add(driver)
     db.session.commit()
     return driver
