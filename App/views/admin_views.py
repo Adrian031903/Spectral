@@ -5,6 +5,7 @@ from App.api.security import role_required
 from App.controllers import admin as admin_controller
 from App.controllers import resident as resident_controller
 from App.controllers import user as user_controller
+from App.database import db
 
 admin_views = Blueprint('admin_views', __name__)
 
@@ -68,9 +69,13 @@ def create_area():
     name = data.get('name')
     if not name:
         return jsonify({'error': {'code': 'validation_error', 'message': 'name required'}}), 422
-    area = admin_controller.admin_add_area(name)
-    out = area.get_json() if hasattr(area, 'get_json') else area
-    return jsonify(out), 201
+    try:
+        area = admin_controller.admin_add_area(name)
+        out = area.get_json() if hasattr(area, 'get_json') else area
+        return jsonify(out), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': {'code': 'admin_area_create_error', 'message': str(e)}}), 400
 
 
 @admin_views.route('/admin/areas/<int:area_id>', methods=['DELETE'])
@@ -88,11 +93,21 @@ def create_street():
     data = request.get_json() or {}
     name = data.get('name')
     area_id = data.get('area_id')
-    if not name or not area_id:
+    if not name or area_id is None:
         return jsonify({'error': {'code': 'validation_error', 'message': 'name and area_id required'}}), 422
-    street = admin_controller.admin_add_street(area_id, name)
-    out = street.get_json() if hasattr(street, 'get_json') else street
-    return jsonify(out), 201
+    try:
+        area_id_int = int(area_id)
+    except (TypeError, ValueError):
+        return jsonify({'error': {'code': 'validation_error', 'message': 'area_id must be an integer'}}), 422
+    if area_id_int <= 0:
+        return jsonify({'error': {'code': 'validation_error', 'message': 'area_id must be > 0'}}), 422
+    try:
+        street = admin_controller.admin_add_street(area_id_int, name)
+        out = street.get_json() if hasattr(street, 'get_json') else street
+        return jsonify(out), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': {'code': 'admin_street_create_error', 'message': str(e)}}), 400
 
 
 @admin_views.route('/admin/streets/<int:street_id>', methods=['DELETE'])

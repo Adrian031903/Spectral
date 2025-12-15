@@ -10,6 +10,10 @@ def resident_create(username, password, area_id, street_id, house_number):
     return resident
 
 def resident_request_stop(resident, drive_id):
+    try:
+        drive_id = int(drive_id)
+    except (TypeError, ValueError):
+        raise ValueError("Invalid drive id.")
     drives = Drive.query.filter_by(areaId=resident.areaId, streetId=resident.streetId, status="Upcoming").all()
     if not any(d.id == drive_id for d in drives):
         raise ValueError("Invalid drive choice.")
@@ -17,13 +21,19 @@ def resident_request_stop(resident, drive_id):
     if existing_stop:
         raise ValueError(f"You have already requested a stop for drive {drive_id}.")
     stop = resident.request_stop(drive_id)
+    if not stop:
+        raise ValueError("Unable to create stop request.")
     _ensure_subscription(resident.id, drive_id)
     return stop
 
-def resident_cancel_stop(resident, drive_id):
-    stop = Stop.query.filter_by(driveId=drive_id, residentId=resident.id).first()
+def resident_cancel_stop(resident, stop_id):
+    try:
+        stop_id = int(stop_id)
+    except (TypeError, ValueError):
+        raise ValueError("Invalid stop id.")
+    stop = Stop.query.filter_by(id=stop_id, residentId=resident.id).first()
     if not stop:
-        raise ValueError("No stop requested for this drive.")
+        raise ValueError("Stop not found.")
     resident.cancel_stop(stop.id)
     return stop
 

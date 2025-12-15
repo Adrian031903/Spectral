@@ -26,7 +26,12 @@ def create_stop():
         return jsonify({'error': {'code': 'validation_error', 'message': 'drive_id required'}}), 422
     uid = current_user_id()
     resident = user_controller.get_user(uid)
-    stop = resident_controller.resident_request_stop(resident, drive_id)
+    try:
+        stop = resident_controller.resident_request_stop(resident, int(drive_id))
+    except ValueError as e:
+        return jsonify({'error': {'code': 'validation_error', 'message': str(e)}}), 400
+    except Exception as e:
+        return jsonify({'error': {'code': 'stop_request_error', 'message': str(e)}}), 400
     out = stop.get_json() if hasattr(stop, 'get_json') else stop
     return jsonify(out), 201
 
@@ -37,7 +42,12 @@ def create_stop():
 def delete_stop(stop_id):
     uid = current_user_id()
     resident = user_controller.get_user(uid)
-    resident_controller.resident_cancel_stop(resident, stop_id)
+    try:
+        resident_controller.resident_cancel_stop(resident, int(stop_id))
+    except ValueError as e:
+        return jsonify({'error': {'code': 'validation_error', 'message': str(e)}}), 400
+    except Exception as e:
+        return jsonify({'error': {'code': 'stop_cancel_error', 'message': str(e)}}), 400
     return '', 204
 
 
