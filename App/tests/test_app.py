@@ -249,6 +249,11 @@ class ResidentsIntegrationTests(unittest.TestCase):
         stop = resident_request_stop(self.resident, self.drive.id)
         self.assertIsNotNone(stop)
 
+    def test_request_stop_in_progress(self):
+        driver_start_drive(self.driver, self.drive.id)
+        stop = resident_request_stop(self.resident, self.drive.id)
+        self.assertIsNotNone(stop)
+
     def test_cancel_stop(self):
         stop = resident_request_stop(self.resident, self.drive.id)
         resident_cancel_stop(self.resident, stop.id)

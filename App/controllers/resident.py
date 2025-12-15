@@ -14,9 +14,15 @@ def resident_request_stop(resident, drive_id):
         drive_id = int(drive_id)
     except (TypeError, ValueError):
         raise ValueError("Invalid drive id.")
-    drives = Drive.query.filter_by(areaId=resident.areaId, streetId=resident.streetId, status="Upcoming").all()
-    if not any(d.id == drive_id for d in drives):
-        raise ValueError("Invalid drive choice.")
+
+    drive = Drive.query.get(drive_id)
+    if not drive:
+        raise ValueError("Drive not found.")
+    if drive.areaId != resident.areaId or drive.streetId != resident.streetId:
+        raise ValueError("Drive is not scheduled for your area/street.")
+    if drive.status not in ("Upcoming", "In Progress"):
+        raise ValueError(f"Drive is not open for stop requests (status: {drive.status}).")
+
     existing_stop = Stop.query.filter_by(driveId=drive_id, residentId=resident.id).first()
     if existing_stop:
         raise ValueError(f"You have already requested a stop for drive {drive_id}.")
